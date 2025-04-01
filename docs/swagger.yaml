@@ -1,0 +1,421 @@
+basePath: /api/v1
+definitions:
+  models.CreateEventRequest:
+    properties:
+      date:
+        example: "2025-04-08T00:00:00Z"
+        type: string
+      description:
+        example: Mantenimiento programado del sistema para actualización
+        type: string
+      name:
+        example: Mantenimiento programado
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/models.EventType'
+        example: MAINTENANCE
+    required:
+    - date
+    - description
+    - name
+    - type
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        example: mensaje descriptivo del error
+        type: string
+    type: object
+  models.EventResponse:
+    properties:
+      createdAt:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      managementStatus:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.EventType:
+    enum:
+    - EMERGENCY
+    - MAINTENANCE
+    - NOTIFICATION
+    - ALERT
+    - INFO
+    type: string
+    x-enum-varnames:
+    - TypeEmergency
+    - TypeMaintenance
+    - TypeNotification
+    - TypeAlert
+    - TypeInfo
+  models.ManagementStatus:
+    enum:
+    - REQUIRES_MANAGEMENT
+    - NO_MANAGEMENT
+    type: string
+    x-enum-varnames:
+    - ManagementRequired
+    - ManagementNotRequired
+  models.ReviewEventRequest:
+    properties:
+      managementStatus:
+        $ref: '#/definitions/models.ManagementStatus'
+    required:
+    - managementStatus
+    type: object
+  models.SuccessResponse:
+    properties:
+      message:
+        example: operación realizada con éxito
+        type: string
+    type: object
+  models.UpdateEventRequest:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/models.EventType'
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API para gestión de eventos
+  title: Events API
+  version: "1.0"
+paths:
+  /events:
+    get:
+      description: Obtiene una lista de todos los eventos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.EventResponse'
+            type: array
+        "404":
+          description: No se encontraron eventos
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Obtener todos los eventos
+      tags:
+      - events
+    post:
+      consumes:
+      - application/json
+      description: Crea un nuevo evento con la información proporcionada
+      parameters:
+      - description: Información del evento
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+        "400":
+          description: Error en los datos de entrada
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Crear un nuevo evento
+      tags:
+      - events
+  /events/{id}:
+    delete:
+      description: Elimina un evento existente
+      parameters:
+      - description: ID del evento
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Evento no encontrado
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Eliminar un evento
+      tags:
+      - events
+    get:
+      description: Obtiene un evento por su ID
+      parameters:
+      - description: ID del evento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+        "404":
+          description: Evento no encontrado
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Obtener un evento por ID
+      tags:
+      - events
+    put:
+      consumes:
+      - application/json
+      description: Actualiza un evento existente
+      parameters:
+      - description: ID del evento
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Información del evento
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+        "400":
+          description: Error en los datos de entrada
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Evento no encontrado
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Actualizar un evento
+      tags:
+      - events
+  /events/{id}/review:
+    put:
+      consumes:
+      - application/json
+      description: Marca un evento como revisado y asigna un estado de gestión
+      parameters:
+      - description: ID del evento
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Información de revisión
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReviewEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+        "400":
+          description: Error en los datos de entrada
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Evento no encontrado
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Revisar un evento
+      tags:
+      - events
+  /events/{id}/unreview:
+    put:
+      description: Devuelve un evento del estado revisado al estado pendiente
+      parameters:
+      - description: ID del evento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+        "400":
+          description: El evento no está en estado revisado
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Evento no encontrado
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Deshacer revisión de un evento
+      tags:
+      - events
+  /events/management-required:
+    get:
+      description: Obtiene una lista de eventos revisados que requieren gestión
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.EventResponse'
+            type: array
+        "404":
+          description: No se encontraron eventos
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Obtener eventos que requieren gestión
+      tags:
+      - events
+  /events/management-status:
+    get:
+      description: Obtiene una lista de los estados de gestión de eventos disponibles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Obtener estados de gestión de eventos
+      tags:
+      - events
+  /events/no-management-required:
+    get:
+      description: Obtiene una lista de eventos revisados que no requieren gestión
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.EventResponse'
+            type: array
+        "404":
+          description: No se encontraron eventos
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Obtener eventos que no requieren gestión
+      tags:
+      - events
+  /events/seed:
+    post:
+      description: Genera eventos de ejemplo para pruebas
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Eventos generados correctamente
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Generar eventos de ejemplo
+      tags:
+      - events
+  /events/status:
+    get:
+      description: Obtiene una lista de los estados de eventos disponibles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Obtener estados de eventos
+      tags:
+      - events
+  /events/types:
+    get:
+      description: Obtiene una lista de los tipos de eventos disponibles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Obtener tipos de eventos
+      tags:
+      - events
+swagger: "2.0"
