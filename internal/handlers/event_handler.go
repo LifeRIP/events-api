@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"events-api/internal/apierror"
 	"events-api/internal/models"
 	"events-api/internal/services"
 )
@@ -42,7 +43,11 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 
 	event, err := h.service.CreateEvent(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -62,7 +67,11 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 func (h *EventHandler) GetAllEvents(c *gin.Context) {
 	events, err := h.service.GetAllEvents(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -90,7 +99,11 @@ func (h *EventHandler) GetEventByID(c *gin.Context) {
 	id := c.Param("id")
 	event, err := h.service.GetEventByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -115,13 +128,17 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	id := c.Param("id")
 	var req models.UpdateEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error en el formato de datos: " + err.Error()})
 		return
 	}
 
 	event, err := h.service.UpdateEvent(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -142,7 +159,11 @@ func (h *EventHandler) DeleteEvent(c *gin.Context) {
 	id := c.Param("id")
 	err := h.service.DeleteEvent(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -166,7 +187,11 @@ func (h *EventHandler) ReviewEvent(c *gin.Context) {
 
 	event, err := h.service.ReviewEvent(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -190,7 +215,11 @@ func (h *EventHandler) UnreviewEvent(c *gin.Context) {
 
 	event, err := h.service.UnreviewEvent(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -248,7 +277,11 @@ func (h *EventHandler) GetEventManagementStatus(c *gin.Context) {
 func (h *EventHandler) SeedEvents(c *gin.Context) {
 	err := h.service.SeedEvents(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -268,7 +301,11 @@ func (h *EventHandler) SeedEvents(c *gin.Context) {
 func (h *EventHandler) GetEventsRequiringManagement(c *gin.Context) {
 	events, err := h.service.GetEventsRequiringManagement(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -294,7 +331,11 @@ func (h *EventHandler) GetEventsRequiringManagement(c *gin.Context) {
 func (h *EventHandler) GetEventsNotRequiringManagement(c *gin.Context) {
 	events, err := h.service.GetEventsNotRequiringManagement(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if apiErr, ok := apierror.AsError(err); ok {
+			c.JSON(apiErr.Status(), gin.H{"error": apiErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

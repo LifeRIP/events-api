@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"events-api/internal/apierror"
 	"events-api/internal/config"
 	"events-api/internal/models"
 	"events-api/pkg/database"
@@ -62,16 +63,16 @@ func (r *eventRepository) FindAll(ctx context.Context) ([]models.Event, error) {
 func (r *eventRepository) FindByID(ctx context.Context, id string) (models.Event, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return models.Event{}, err
+		return models.Event{}, apierror.NewError(apierror.BadRequest, "ID de evento inválido")
 	}
 
 	var event models.Event
 	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&event)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return models.Event{}, errors.New("evento no encontrado")
+			return models.Event{}, apierror.NewError(apierror.NotFound, "evento no encontrado")
 		}
-		return models.Event{}, err
+		return models.Event{}, apierror.NewError(apierror.Internal, "error al buscar el evento: "+err.Error())
 	}
 
 	return event, nil
@@ -101,7 +102,7 @@ func (r *eventRepository) Create(ctx context.Context, event models.Event) (model
 func (r *eventRepository) Update(ctx context.Context, id string, event models.Event) (models.Event, error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return models.Event{}, err
+		return models.Event{}, apierror.NewError(apierror.BadRequest, "ID de evento inválido")
 	}
 
 	event.UpdatedAt = time.Now()
@@ -120,11 +121,11 @@ func (r *eventRepository) Update(ctx context.Context, id string, event models.Ev
 
 	result, err := r.collection.UpdateOne(ctx, bson.M{"_id": objectID}, update)
 	if err != nil {
-		return models.Event{}, err
+		return models.Event{}, apierror.NewError(apierror.Internal, "error al actualizar el evento: "+err.Error())
 	}
 
 	if result.MatchedCount == 0 {
-		return models.Event{}, errors.New("evento no encontrado")
+		return models.Event{}, apierror.NewError(apierror.NotFound, "evento no encontrado")
 	}
 
 	return r.FindByID(ctx, id)
@@ -134,16 +135,16 @@ func (r *eventRepository) Update(ctx context.Context, id string, event models.Ev
 func (r *eventRepository) Delete(ctx context.Context, id string) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return apierror.NewError(apierror.BadRequest, "ID de evento inválido")
 	}
 
 	result, err := r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
 	if err != nil {
-		return err
+		return apierror.NewError(apierror.Internal, "error al eliminar el evento: "+err.Error())
 	}
 
 	if result.DeletedCount == 0 {
-		return errors.New("evento no encontrado")
+		return apierror.NewError(apierror.NotFound, "evento no encontrado")
 	}
 
 	return nil

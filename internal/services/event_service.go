@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"events-api/internal/apierror"
 	"events-api/internal/models"
 	"events-api/internal/repositories"
 
@@ -69,7 +69,7 @@ func (s *eventService) GetEventByID(ctx context.Context, id string) (models.Even
 func (s *eventService) CreateEvent(ctx context.Context, req models.CreateEventRequest) (models.EventResponse, error) {
 	// Validar tipo de evento
 	if !isValidEventType(req.Type) {
-		return models.EventResponse{}, errors.New("tipo de evento no válido")
+		return models.EventResponse{}, apierror.NewError(apierror.ValidationFail, "tipo de evento no válido")
 	}
 
 	event := models.Event{
@@ -102,7 +102,7 @@ func (s *eventService) UpdateEvent(ctx context.Context, id string, req models.Up
 
 	if req.Type != "" {
 		if !isValidEventType(req.Type) {
-			return models.EventResponse{}, errors.New("tipo de evento no válido")
+			return models.EventResponse{}, apierror.NewError(apierror.ValidationFail, "tipo de evento no válido")
 		}
 		existingEvent.Type = req.Type
 	}
@@ -143,7 +143,7 @@ func (s *eventService) ReviewEvent(ctx context.Context, id string, req models.Re
 	case models.TypeMaintenance, models.TypeNotification, models.TypeInfo:
 		managementStatus = models.ManagementNotRequired
 	default:
-		return models.EventResponse{}, errors.New("tipo de evento no reconocido")
+		return models.EventResponse{}, apierror.NewError(apierror.ValidationFail, "tipo de evento no reconocido")
 	}
 
 	// Actualizar estado y estado de gestión
@@ -167,7 +167,7 @@ func (s *eventService) UnreviewEvent(ctx context.Context, id string) (models.Eve
 
 	// Verificar que el evento esté en estado revisado
 	if existingEvent.Status != models.StatusReviewed {
-		return models.EventResponse{}, errors.New("el evento no está en estado revisado")
+		return models.EventResponse{}, apierror.NewError(apierror.ValidationFail, "el evento no está en estado revisado")
 	}
 
 	// Cambiar el estado a pendiente y eliminar el estado de gestión
