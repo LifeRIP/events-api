@@ -13,7 +13,7 @@ Este proyecto implementa una API RESTful para la gestión de eventos utilizando 
 
 
 ```shellscript
-git clone https://github.com/tu-usuario/events-api.git
+git clone https://github.com/LifeRIP/events-api.git
 cd events-api
 ```
 
