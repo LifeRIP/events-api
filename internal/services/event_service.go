@@ -128,21 +128,27 @@ func (s *eventService) DeleteEvent(ctx context.Context, id string) error {
 	return s.repository.Delete(ctx, id)
 }
 
-// ReviewEvent revisa un evento y asigna un estado de gestión
+// ReviewEvent revisa un evento y asigna un estado de gestión automáticamente
 func (s *eventService) ReviewEvent(ctx context.Context, id string, req models.ReviewEventRequest) (models.EventResponse, error) {
 	existingEvent, err := s.repository.FindByID(ctx, id)
 	if err != nil {
 		return models.EventResponse{}, err
 	}
 
-	// Validar estado de gestión
-	if req.ManagementStatus != models.ManagementRequired && req.ManagementStatus != models.ManagementNotRequired {
-		return models.EventResponse{}, errors.New("estado de gestión no válido")
+	// Determinar automáticamente el estado de gestión basado en el tipo de evento
+	var managementStatus models.ManagementStatus
+	switch existingEvent.Type {
+	case models.TypeEmergency, models.TypeAlert:
+		managementStatus = models.ManagementRequired
+	case models.TypeMaintenance, models.TypeNotification, models.TypeInfo:
+		managementStatus = models.ManagementNotRequired
+	default:
+		return models.EventResponse{}, errors.New("tipo de evento no reconocido")
 	}
 
 	// Actualizar estado y estado de gestión
 	existingEvent.Status = models.StatusReviewed
-	existingEvent.ManagementStatus = req.ManagementStatus
+	existingEvent.ManagementStatus = managementStatus
 
 	updatedEvent, err := s.repository.Update(ctx, id, existingEvent)
 	if err != nil {

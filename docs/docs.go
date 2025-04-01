@@ -392,10 +392,7 @@ const docTemplate = `{
         },
         "/events/{id}/review": {
             "put": {
-                "description": "Marca un evento como revisado y asigna un estado de gestión",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Marca un evento como revisado y asigna automáticamente un estado de gestión según su tipo",
                 "produces": [
                     "application/json"
                 ],
@@ -410,15 +407,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Información de revisión",
-                        "name": "review",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.ReviewEventRequest"
-                        }
                     }
                 ],
                 "responses": {
@@ -426,12 +414,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.EventResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Error en los datos de entrada",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
@@ -586,28 +568,6 @@ const docTemplate = `{
                 "TypeAlert",
                 "TypeInfo"
             ]
-        },
-        "models.ManagementStatus": {
-            "type": "string",
-            "enum": [
-                "REQUIRES_MANAGEMENT",
-                "NO_MANAGEMENT"
-            ],
-            "x-enum-varnames": [
-                "ManagementRequired",
-                "ManagementNotRequired"
-            ]
-        },
-        "models.ReviewEventRequest": {
-            "type": "object",
-            "required": [
-                "managementStatus"
-            ],
-            "properties": {
-                "managementStatus": {
-                    "$ref": "#/definitions/models.ManagementStatus"
-                }
-            }
         },
         "models.SuccessResponse": {
             "type": "object",

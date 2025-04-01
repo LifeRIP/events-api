@@ -152,24 +152,17 @@ func (h *EventHandler) DeleteEvent(c *gin.Context) {
 // ReviewEvent godoc
 //
 //	@Summary		Revisar un evento
-//	@Description	Marca un evento como revisado y asigna un estado de gestión
+//	@Description	Marca un evento como revisado y asigna automáticamente un estado de gestión según su tipo
 //	@Tags			events
-//	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string						true	"ID del evento"
-//	@Param			review	body		models.ReviewEventRequest	true	"Información de revisión"
-//	@Success		200		{object}	models.EventResponse
-//	@Failure		400		{object}	models.ErrorResponse	"Error en los datos de entrada"
-//	@Failure		404		{object}	models.ErrorResponse	"Evento no encontrado"
-//	@Failure		500		{object}	models.ErrorResponse	"Error interno del servidor"
+//	@Param			id	path		string	true	"ID del evento"
+//	@Success		200	{object}	models.EventResponse
+//	@Failure		404	{object}	models.ErrorResponse	"Evento no encontrado"
+//	@Failure		500	{object}	models.ErrorResponse	"Error interno del servidor"
 //	@Router			/events/{id}/review [put]
 func (h *EventHandler) ReviewEvent(c *gin.Context) {
 	id := c.Param("id")
 	var req models.ReviewEventRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 
 	event, err := h.service.ReviewEvent(c.Request.Context(), id, req)
 	if err != nil {
@@ -197,14 +190,6 @@ func (h *EventHandler) UnreviewEvent(c *gin.Context) {
 
 	event, err := h.service.UnreviewEvent(c.Request.Context(), id)
 	if err != nil {
-		if err.Error() == "el evento no está en estado revisado" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		if err.Error() == "evento no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -62,21 +62,6 @@ definitions:
     - TypeNotification
     - TypeAlert
     - TypeInfo
-  models.ManagementStatus:
-    enum:
-    - REQUIRES_MANAGEMENT
-    - NO_MANAGEMENT
-    type: string
-    x-enum-varnames:
-    - ManagementRequired
-    - ManagementNotRequired
-  models.ReviewEventRequest:
-    properties:
-      managementStatus:
-        $ref: '#/definitions/models.ManagementStatus'
-    required:
-    - managementStatus
-    type: object
   models.SuccessResponse:
     properties:
       message:
@@ -242,21 +227,14 @@ paths:
       - events
   /events/{id}/review:
     put:
-      consumes:
-      - application/json
-      description: Marca un evento como revisado y asigna un estado de gestión
+      description: Marca un evento como revisado y asigna automáticamente un estado
+        de gestión según su tipo
       parameters:
       - description: ID del evento
         in: path
         name: id
         required: true
         type: string
-      - description: Información de revisión
-        in: body
-        name: review
-        required: true
-        schema:
-          $ref: '#/definitions/models.ReviewEventRequest'
       produces:
       - application/json
       responses:
@@ -264,10 +242,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.EventResponse'
-        "400":
-          description: Error en los datos de entrada
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Evento no encontrado
           schema:
