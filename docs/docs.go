@@ -582,16 +582,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "date": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-04-15T00:00:00Z"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Actualización de la descripción del mantenimiento programado"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Actualización de mantenimiento"
                 },
                 "type": {
-                    "$ref": "#/definitions/models.EventType"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.EventType"
+                        }
+                    ],
+                    "example": "MAINTENANCE"
                 }
             }
         }

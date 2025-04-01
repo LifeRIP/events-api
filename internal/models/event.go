@@ -55,10 +55,10 @@ type CreateEventRequest struct {
 
 // UpdateEventRequest representa la solicitud para actualizar un evento
 type UpdateEventRequest struct {
-	Name        string    `json:"name"`
-	Type        EventType `json:"type"`
-	Description string    `json:"description"`
-	Date        time.Time `json:"date"`
+	Name        string    `json:"name" example:"Actualización de mantenimiento"`
+	Type        EventType `json:"type" example:"MAINTENANCE"`
+	Description string    `json:"description" example:"Actualización de la descripción del mantenimiento programado"`
+	Date        time.Time `json:"date" example:"2025-04-15T00:00:00Z"`
 }
 
 // ReviewEventRequest representa la solicitud para revisar un evento

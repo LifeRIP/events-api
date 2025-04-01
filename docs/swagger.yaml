@@ -71,13 +71,18 @@ definitions:
   models.UpdateEventRequest:
     properties:
       date:
+        example: "2025-04-15T00:00:00Z"
         type: string
       description:
+        example: Actualización de la descripción del mantenimiento programado
         type: string
       name:
+        example: Actualización de mantenimiento
         type: string
       type:
-        $ref: '#/definitions/models.EventType'
+        allOf:
+        - $ref: '#/definitions/models.EventType'
+        example: MAINTENANCE
     type: object
 host: localhost:8080
 info:

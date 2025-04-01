@@ -212,6 +212,9 @@ func (s *eventService) GetEventManagementStatus(ctx context.Context) []string {
 // SeedEvents genera eventos de ejemplo
 func (s *eventService) SeedEvents(ctx context.Context) error {
 	// Crear algunos eventos de ejemplo
+	pendingId1 := primitive.NewObjectID()
+	pendingId2 := primitive.NewObjectID()
+
 	events := []models.Event{
 		{
 			ID:          primitive.NewObjectID(),
@@ -238,6 +241,22 @@ func (s *eventService) SeedEvents(ctx context.Context) error {
 			Status:      models.StatusPending,
 		},
 		{
+			ID:          pendingId1,
+			Name:        "Ejemplo para revisión inmediata",
+			Type:        models.TypeInfo,
+			Description: "Este evento se crea como pendiente y se revisa inmediatamente",
+			Date:        time.Now(),
+			Status:      models.StatusPending,
+		},
+		{
+			ID:          pendingId2,
+			Name:        "Emergencia para revisión inmediata",
+			Type:        models.TypeEmergency,
+			Description: "Emergencia que requiere atención inmediata",
+			Date:        time.Now(),
+			Status:      models.StatusPending,
+		},
+		{
 			ID:          primitive.NewObjectID(),
 			Name:        "Emergencia de red",
 			Type:        models.TypeEmergency,
@@ -256,7 +275,29 @@ func (s *eventService) SeedEvents(ctx context.Context) error {
 		},
 	}
 
-	return s.repository.BulkInsert(ctx, events)
+	err := s.repository.BulkInsert(ctx, events)
+	if err != nil {
+		return err
+	}
+
+	// Revisar inmediatamente los eventos específicos
+	// Evento Info
+	_, err = s.ReviewEvent(ctx, pendingId1.Hex(), models.ReviewEventRequest{
+		ManagementStatus: models.ManagementNotRequired,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Evento Emergency
+	_, err = s.ReviewEvent(ctx, pendingId2.Hex(), models.ReviewEventRequest{
+		ManagementStatus: models.ManagementRequired,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetEventsRequiringManagement recupera eventos que requieren gestión
